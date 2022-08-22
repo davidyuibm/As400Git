@@ -1,0 +1,72 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*                                                                         */
+/*  Crtprfexit - Crtusrprf exit. Adds Monitored Resource to Admin Domain.  */
+/*                                                                         */
+/*  Register this exit program as follows:                                 */
+/*                                                                         */
+/*  ADDEXITPGM EXITPNT(QIBM_QSY_CRT_PROFILE) FORMAT(CRTP0100)              */
+/*             PGMNBR(1) PGM(QZRDPWRHA/CRTPRFEXIT)                         */
+/*             TEXT('Add new profile to Admin Domain')                     */
+/*             CRTEXITPNT(*YES)                                            */
+/*                                                                         */
+/*                                                                         */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+             PGM        PARM(&INPUT)
+
+             DCL        VAR(&INPUT) TYPE(*CHAR) LEN(38)
+             DCL        VAR(&USER) TYPE(*CHAR) STG(*DEFINED) LEN(10) +
+                          DEFVAR(&INPUT 29)
+
+             DCL        VAR(&CURUSER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&QZRDPWRHA) TYPE(*CHAR) LEN(1) VALUE('1')
+
+ /* CLUSTERING DECLARES                                              */
+             DCL        VAR(&CLUNAME) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&THISNODE) TYPE(*CHAR) LEN(8)
+             DCL        VAR(&CLURTN) TYPE(*CHAR) LEN(124)
+             DCL        VAR(&STS) TYPE(*CHAR) LEN(1)
+
+/*           All errors from the exit program are ignored, so don't surface */
+             MONMSG     MSGID(CPF0000)
+
+/*           Check for running as QSYS                                     */
+             RTVJOBA    USER(&CURUSER)
+             IF         COND(&CURUSER *EQ 'QSYS') THEN(RETURN)
+
+
+/*           Ensure tools library is in the lirary list                    */
+             ADDLIBLE   LIB(QZRDPWRHA)
+             MONMSG     MSGID(CPF2103) EXEC(CHGVAR VAR(&QZRDPWRHA) +
+                          VALUE('0'))
+
+/*** Retrieve the cluster name ***/
+
+             QZRDPWRHA/RTVCLUNAME NAME(&CLUNAME) NODE(&THISNODE)
+
+
+/* Abort process if local cluster node not active  */
+/* This user will not be added to the dev domain   */
+
+
+             RTVCLUSTS  CLUSTER(&CLURTN) CLUACT(&STS)
+             IF (&STS *NE '1') THEN(DO)
+             SNDPGMMSG  MSG('PROFILE' |> &USER |> 'NOT ADDED TO +
+                          ADM DOMAIN')
+             GOTO       CMDLBL(END)
+             ENDDO
+
+
+/*  ADD YOU OWN ADMIN DOMAIN NAME IN HERE!!!!                  */
+
+             ADDCADMRE  CLUSTER(&CLUNAME) ADMDMN(NAME) +
+                          RESOURCE(&USER) RSCTYPE(*USRPRF)
+
+
+/*           If tools library was added to the library list, remove it     */
+
+END:         IF         COND(&QZRDPWRHA *EQ '1') THEN(DO)
+             RMVLIBLE   LIB(QZRDPWRHA)
+             ENDDO
+
+ENDPGM

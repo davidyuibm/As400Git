@@ -1,0 +1,33 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*                                                                         */
+/*  Skeleton Exit Program for Power Down System processing                 */
+/*                                                                         */
+/*  You can only have one exit program registered to this exit point &     */
+/*  format.  There are no parameters passed to or from this program.       */
+/*  This program will NOT get called if the system is already in a         */
+/*  restricted state when the PWRDWNSYS or ENDSYS command is issued:       */
+/*                                                                         */
+/*  ADDEXITPGM EXITPNT(QIBM_QWC_PWRDWNSYS) FORMAT(PWRD0100)                */
+/*             PGMNBR(1) PGM(MYLIB/PWRDWNEXIT)                             */
+/*             TEXT('PWRDWNSYS exit program to end geo mirror')            */
+/*             CRTEXITPNT(*YES)                                            */
+/*                                                                         */
+/*                                                                         */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+             PGM
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*           All errors from the exit program are ignored, so don't surface */
+             MONMSG     MSGID(CPF0000)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Gracefully shut down geo mirror so you don't failover                   */
+             VRYCFG     CFGOBJ(IASPxx) CFGTYPE(*DEV) STATUS(*OFF) +
+                          FRCVRYOFF(*YES)
+             ENDCRG     CLUSTER(mycluster) CRG(geomircrg)
+             ENDCLUNOD  CLUSTER(mycluster) NODE(thisnode)
+
+             ENDPGM

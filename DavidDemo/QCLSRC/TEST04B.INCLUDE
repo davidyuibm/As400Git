@@ -1,0 +1,20 @@
+/* DECLARATIONS FOR RTVRCYDMN */
+             DCL        VAR(&CRGRTN) TYPE(*CHAR) LEN(164)
+             DCL        VAR(&NODESTS) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&NODETYP) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&STS) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&CRGPTR) TYPE(*PTR) ADDRESS(&CRGRTN)
+             DCL        VAR(&CRGBSD) TYPE(*CHAR) STG(*BASED) LEN(16) +
+                          BASPTR(&CRGPTR)
+             DCL        VAR(&CRGOFF) TYPE(*INT) STG(*AUTO) LEN(4) +
+                          VALUE(16)
+             DCL        VAR(&CRGNOD) TYPE(*CHAR) STG(*DEFINED) LEN(8) +
+                          DEFVAR(&CRGBSD 1)
+             DCL        VAR(&CRGSTS) TYPE(*INT) STG(*DEFINED) +
+                          LEN(4) DEFVAR(&CRGBSD 13)
+             DCL        VAR(&CRGTYP) TYPE(*INT) STG(*DEFINED) +
+                          LEN(2) DEFVAR(&CRGBSD 13)
+             DCL        VAR(&I) TYPE(*INT) LEN(4) VALUE(0)
+             DCL        VAR(&LISTNUM) TYPE(*INT) STG(*DEFINED) +
+                          LEN(4) DEFVAR(&CRGRTN)
+             DCL        VAR(&WKCLUOK) TYPE(*INT) LEN(4)
